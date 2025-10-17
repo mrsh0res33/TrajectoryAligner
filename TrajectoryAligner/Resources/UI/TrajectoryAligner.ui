@@ -1,0 +1,451 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>TrajectoryAligner</class>
+ <widget class="qMRMLWidget" name="TrajectoryAligner">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>845</width>
+    <height>1249</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="font">
+   <font>
+    <pointsize>10</pointsize>
+   </font>
+  </property>
+  <property name="windowTitle">
+   <string>Trajectory Aligner</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="ctkCollapsibleButton" name="instructionsCollapsibleButton">
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Instructions</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
+     </property>
+     <layout class="QFormLayout" name="advancedFormLayout">
+      <item row="0" column="0" colspan="2">
+       <widget class="QLabel" name="instructionsLabel">
+        <property name="styleSheet">
+         <string>background-color: #f0f0f0; padding: 10px; border: 1px solid #cccccc;</string>
+        </property>
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Instructions:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;1. Create or select a line markup to define the trajectory using Trajectory Settings &amp;gt; Active Trajectory&lt;/p&gt;&lt;p&gt;2. The first point will be the distal end (tip/deepest)&lt;/p&gt;&lt;p&gt;3. The second point will be the proximal end (surface)&lt;/p&gt;&lt;p&gt;4. The transform will automatically update as you move the line points&lt;/p&gt;&lt;p&gt;5. The trajectory can also be rotated around its axis using Rotation Settings &amp;gt; Local Yaw&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="trajectoryCollapsibleButton">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Trajectory Settings</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="QGroupBox" name="groupBox_2">
+        <property name="title">
+         <string>Active Trajectory</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_7">
+         <item>
+          <widget class="qSlicerSimpleMarkupsWidget" name="TrajectoryLineMarkupWidget">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777212</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+            </font>
+           </property>
+           <property name="enterPlaceModeOnNodeChange">
+            <bool>false</bool>
+           </property>
+           <property name="defaultNodeColor">
+            <color>
+             <red>255</red>
+             <green>255</green>
+             <blue>255</blue>
+            </color>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>trajectoryLine</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="ctkCollapsibleButton" name="trajectoryTransformCollapsible">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>View Trajectory Transform Matrix</string>
+        </property>
+        <property name="collapsed">
+         <bool>true</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_2">
+         <item>
+          <widget class="QLabel" name="transformNameLabel">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string>font-weight: bold; color: #0066cc;</string>
+           </property>
+           <property name="text">
+            <string>Transform: None</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="qMRMLMatrixWidget" name="trajectoryMatrix">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="editable">
+            <bool>false</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>trajectoryTransform</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="rotationCollapsibleButton">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Rotation Settings</string>
+     </property>
+     <property name="collapsed">
+      <bool>false</bool>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="QGroupBox" name="groupBox">
+        <property name="title">
+         <string>Local Yaw</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <widget class="qMRMLLinearTransformSlider" name="rotationSlider">
+           <property name="minimum">
+            <double>-180.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>180.000000000000000</double>
+           </property>
+           <property name="quantity">
+            <string>angle</string>
+           </property>
+           <property name="TypeOfTransform">
+            <enum>qMRMLLinearTransformSlider::ROTATION_IS</enum>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>rotationAngle</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QGroupBox" name="groupBox_3">
+        <property name="title">
+         <string>Trajectory Offset</string>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_8">
+         <item>
+          <widget class="qMRMLLinearTransformSlider" name="trajectoryOffsetSlider">
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+           <property name="minimum">
+            <double>-30.000000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>30.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="ctkCollapsibleButton" name="rotationTransformCollapsible">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>View Rotation Transform Matrix</string>
+        </property>
+        <property name="collapsed">
+         <bool>true</bool>
+        </property>
+        <layout class="QVBoxLayout" name="verticalLayout_5">
+         <item>
+          <widget class="QLabel" name="transformNameLabel_2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>10</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="styleSheet">
+            <string>font-weight: bold; color: #0066cc;</string>
+           </property>
+           <property name="text">
+            <string>Rotation: None</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="qMRMLMatrixWidget" name="rotationMatrix">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="editable">
+            <bool>false</bool>
+           </property>
+           <property name="SlicerParameterName" stdset="0">
+            <string>rotationTransform</string>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="ctkCollapsibleButton" name="originCollapsibleButton">
+     <property name="font">
+      <font>
+       <pointsize>14</pointsize>
+      </font>
+     </property>
+     <property name="text">
+      <string>Origin Settings</string>
+     </property>
+     <property name="collapsed">
+      <bool>true</bool>
+     </property>
+     <layout class="QFormLayout" name="transformFormLayout">
+      <item row="0" column="0">
+       <widget class="QLabel" name="deviceUnitLabel">
+        <property name="font">
+         <font>
+          <pointsize>12</pointsize>
+         </font>
+        </property>
+        <property name="text">
+         <string>Original Unit Vector</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QLineEdit" name="deviceUnitLineEdit">
+        <property name="toolTip">
+         <string>Unit vector representing the device orientation (e.g., [0,0,1] for z-axis)</string>
+        </property>
+        <property name="text">
+         <string>[0,0,1]</string>
+        </property>
+        <property name="SlicerParameterName" stdset="0">
+         <string>deviceUnitVector</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+  </layout>
+  <zorder>trajectoryCollapsibleButton</zorder>
+  <zorder>originCollapsibleButton</zorder>
+  <zorder>rotationCollapsibleButton</zorder>
+  <zorder>instructionsCollapsibleButton</zorder>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>ctkCollapsibleButton</class>
+   <extends>QWidget</extends>
+   <header>ctkCollapsibleButton.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>ctkMatrixWidget</class>
+   <extends>QWidget</extends>
+   <header>ctkMatrixWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>ctkSliderWidget</class>
+   <extends>QWidget</extends>
+   <header>ctkSliderWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLLinearTransformSlider</class>
+   <extends>qMRMLSliderWidget</extends>
+   <header>qMRMLLinearTransformSlider.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLMatrixWidget</class>
+   <extends>ctkMatrixWidget</extends>
+   <header>qMRMLMatrixWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLSliderWidget</class>
+   <extends>ctkSliderWidget</extends>
+   <header>qMRMLSliderWidget.h</header>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLWidget</class>
+   <extends>QWidget</extends>
+   <header>qMRMLWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qSlicerWidget</class>
+   <extends>QWidget</extends>
+   <header>qSlicerWidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qSlicerSimpleMarkupsWidget</class>
+   <extends>qSlicerWidget</extends>
+   <header>qSlicerSimpleMarkupsWidget.h</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections>
+  <connection>
+   <sender>TrajectoryAligner</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>TrajectoryLineMarkupWidget</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>211</x>
+     <y>340</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>211</x>
+     <y>595</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>TrajectoryAligner</sender>
+   <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
+   <receiver>trajectoryOffsetSlider</receiver>
+   <slot>setMRMLScene(vtkMRMLScene*)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>422</x>
+     <y>624</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>422</x>
+     <y>285</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
+</ui>

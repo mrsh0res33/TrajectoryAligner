@@ -1,2 +1,2 @@
 # DiScUtilities
-3D Slicer extension facillitating the placement of virtual depth probes.
+3D Slicer extension for creating and placing virtual depth electrode arrays
