@@ -29,7 +29,7 @@
     <widget class="ctkCollapsibleButton" name="instructionsCollapsibleButton">
      <property name="font">
       <font>
-       <pointsize>14</pointsize>
+       <pointsize>16</pointsize>
       </font>
      </property>
      <property name="text">
@@ -48,7 +48,7 @@
          <string>background-color: #f0f0f0; padding: 10px; border: 1px solid #cccccc;</string>
         </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Instructions:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;1. Create or select a line markup to define the trajectory using Trajectory Settings &amp;gt; Active Trajectory&lt;/p&gt;&lt;p&gt;2. The first point will be the distal end (tip/deepest)&lt;/p&gt;&lt;p&gt;3. The second point will be the proximal end (surface)&lt;/p&gt;&lt;p&gt;4. The transform will automatically update as you move the line points&lt;/p&gt;&lt;p&gt;5. The trajectory can also be rotated around its axis using Rotation Settings &amp;gt; Local Yaw&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Instructions:&lt;/span&gt;&lt;/p&gt;&lt;p&gt;1. Create or select a line markup to define the trajectory using &amp;quot;Trajectory Settings &amp;gt; Active Trajectory&amp;quot;. Note that only the line currently selected in &amp;quot;Active Trajectory&amp;quot; will be editable. Other trajectories will be locked.&lt;/p&gt;&lt;p&gt;2. The first point will be the distal end (tip/deepest) while the second point will be the proximal end (entry/surface)&lt;/p&gt;&lt;p&gt;3. A linked transform matrix will automatically update as you move the line points&lt;/p&gt;&lt;p&gt;4. Objects linked to the trajectory can be rotated around the trajectory axis using &amp;quot;Fine Tune &amp;gt; Twist&amp;quot;&lt;/p&gt;&lt;p&gt;5. Linked objects can also be translated along the trajectory using &amp;quot;Fine Tune &amp;gt; Trajectory Offset&amp;quot; (Note that the tick box increases in increments but any value in mm can be typed in for a more precise offset)&lt;/p&gt;&lt;p&gt;6. Any linked meshes or markups should be aligned to the vector [0, 0, 1] by default. In exceptional cases, this alignment vector can be changed in &amp;quot;Origin Settings &amp;gt; Original Unit Vector&amp;quot;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
         <property name="wordWrap">
          <bool>true</bool>
@@ -71,17 +71,17 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>14</pointsize>
+       <pointsize>16</pointsize>
       </font>
      </property>
      <property name="text">
       <string>Trajectory Settings</string>
      </property>
      <property name="checked">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
      <property name="collapsed">
-      <bool>true</bool>
+      <bool>false</bool>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_4">
       <item>
@@ -186,11 +186,11 @@
      </property>
      <property name="font">
       <font>
-       <pointsize>14</pointsize>
+       <pointsize>16</pointsize>
       </font>
      </property>
      <property name="text">
-      <string>Rotation Settings</string>
+      <string>Fine Tune</string>
      </property>
      <property name="collapsed">
       <bool>false</bool>
@@ -199,7 +199,7 @@
       <item>
        <widget class="QGroupBox" name="groupBox">
         <property name="title">
-         <string>Local Yaw</string>
+         <string>Twist</string>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_6">
          <item>
@@ -246,59 +246,6 @@
         </layout>
        </widget>
       </item>
-      <item>
-       <widget class="ctkCollapsibleButton" name="rotationTransformCollapsible">
-        <property name="font">
-         <font>
-          <pointsize>12</pointsize>
-         </font>
-        </property>
-        <property name="text">
-         <string>View Rotation Transform Matrix</string>
-        </property>
-        <property name="collapsed">
-         <bool>true</bool>
-        </property>
-        <layout class="QVBoxLayout" name="verticalLayout_5">
-         <item>
-          <widget class="QLabel" name="transformNameLabel_2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>10</pointsize>
-             <weight>75</weight>
-             <bold>true</bold>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string>font-weight: bold; color: #0066cc;</string>
-           </property>
-           <property name="text">
-            <string>Rotation: None</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="qMRMLMatrixWidget" name="rotationMatrix">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="editable">
-            <bool>false</bool>
-           </property>
-           <property name="SlicerParameterName" stdset="0">
-            <string>rotationTransform</string>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </widget>
-      </item>
      </layout>
     </widget>
    </item>
@@ -306,11 +253,14 @@
     <widget class="ctkCollapsibleButton" name="originCollapsibleButton">
      <property name="font">
       <font>
-       <pointsize>14</pointsize>
+       <pointsize>16</pointsize>
       </font>
      </property>
      <property name="text">
       <string>Origin Settings</string>
+     </property>
+     <property name="checked">
+      <bool>false</bool>
      </property>
      <property name="collapsed">
       <bool>true</bool>
