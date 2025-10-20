@@ -1,5 +1,5 @@
 # Trajectory Aligner Module
-3D Slicer module for creating and placing virtual depth electrode arrays
+3D Slicer module for rapidly placing virtual depth electrode arrays using line markups
 ![TrajectoryAlignerforGif(GIF)](https://github.com/user-attachments/assets/92e1f7ce-95e1-448c-a425-f8489e257730)
 
 ## Installation
