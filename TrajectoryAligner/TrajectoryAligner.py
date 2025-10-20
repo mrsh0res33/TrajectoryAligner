@@ -390,12 +390,15 @@ class TrajectoryAlignerLogic(ScriptedLoadableModuleLogic):
             tuple: (R, trajectory_unit) - rotation matrix and trajectory unit vector
         """
         
+        # -- Trajectory Handling --
         # Find the vector between trajectory points
         trajectory = trajectory_end - trajectory_start
-        
         # Find the unit vector of the trajectory
         trajectory_unit = trajectory / np.linalg.norm(trajectory)
-        
+        # Let's store a copy in the markup as an attribute since it will matter later
+        self.getParameterNode().trajectoryLine.SetAttribute("trajectory_unit", str(trajectory_unit))
+
+
         # Specify the input vector and target vector
         a = device_unit
         b = trajectory_unit
