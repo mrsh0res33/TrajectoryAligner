@@ -15,7 +15,7 @@ from slicer.parameterNodeWrapper import (
     WithinRange,
 )
 
-from slicer import vtkMRMLMarkupsLineNode, vtkMRMLLinearTransformNode, vtkMRMLMarkupsNode
+from slicer import vtkMRMLMarkupsLineNode, vtkMRMLLinearTransformNode, vtkMRMLMarkupsNode, vtkMRMLSubjectHierarchyNode
 
 
 #
@@ -51,22 +51,14 @@ class TrajectoryAlignerParameterNode:
     """
     The parameters needed by the module.
     """
+    #The subject hierarchy node for the scene
+    shNode: vtkMRMLSubjectHierarchyNode
     #Create a Line markup node to hold the trajectory
     trajectoryLine: vtkMRMLMarkupsLineNode
-    #The Subject hierarchy reference
-    trajectoryLineItem: int
     #Create a Linear Transform node to hold the 4x4 matrix transform
     trajectoryTransform: vtkMRMLLinearTransformNode
-    #Create an offset to move along the trajectory
-    trajectoryOffset: float = 0
-    #Create a rotation parameter to hold the device yaw in degrees
-    rotationAngle: float = 0
-    #Create a Linear Transform node to hold the rotation transform 
-    rotationTransform: vtkMRMLLinearTransformNode
-    
     #The unit vector of the device prior to import
     deviceUnitVector: str = "[0,0,1]"
-
 
 
 #
@@ -108,7 +100,9 @@ class TrajectoryAlignerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin)
         #Get the SubjectHierarchyNode for node manipulation
         self._parameterNode.shNode = slicer.mrmlScene.GetSubjectHierarchyNode()
 
-        # Connections
+        # --Connections--
+        
+        # Scene Connections
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.StartCloseEvent, self.onSceneStartClose)
         self.addObserver(slicer.mrmlScene, slicer.mrmlScene.EndCloseEvent, self.onSceneEndClose)
 
@@ -116,8 +110,8 @@ class TrajectoryAlignerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin)
         self.ui.TrajectoryLineMarkupWidget.markupsSelectorComboBox().connect("currentNodeChanged(vtkMRMLNode*)", self.onTrajectoryLineChanged)
 
         #Slider connections
-        self.ui.rotationSlider.connect("valueChanged(double)",self.onRotationAngleChanged)
-        self.ui.trajectoryOffsetSlider.connect("valueChanged(double)",self.onTrajectoryOffsetChanged)
+        self.ui.rotationSlider.connect("valueChanged(double)",self.onRotationAngleChanged) #Twist rotation
+        self.ui.trajectoryOffsetSlider.connect("valueChanged(double)",self.onTrajectoryOffsetChanged) #Move along trajectory
 
         #Line Unit vector field
         self.ui.deviceUnitLineEdit.connect("textChanged(QString)",self.onDeviceUnitChanged)
@@ -139,14 +133,8 @@ class TrajectoryAlignerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin)
         #self.ui.TrajectoryLineMarkupWidget.markupsSelectorComboBox().addAttribute("vtkMRMLMarkupsLineNode","Category","Trajectory")
         # Select the current line in the selector
         self.ui.TrajectoryLineMarkupWidget.setCurrentNode(self._parameterNode.trajectoryLine)
-        
-        #notes
-        #Output the current
-        #logging.info(self.ui.TrajectoryLineMarkupWidget.currentNode())
-        #logging.info(self._parameterNode.trajectoryLine)
-
-        #self.ui.trajectoryControlPointWidget.setMRMLScene(slicer.mrmlScene)
-        #self.ui.trajectoryControlPointWidget.setCurrentNode(self._parameterNode.trajectoryLine)
+        #Update the transform matrix accordingly
+        self.updateLinkedMatrix()
 
 
     def cleanup(self) -> None:
@@ -196,56 +184,14 @@ class TrajectoryAlignerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin)
         """Update GUI elements based on current state."""
         
         #Update the Matrix Viewers' Text
-        if self._parameterNode and self._parameterNode.trajectoryLine:
-            transformName = f"Transform_to_{self._parameterNode.trajectoryLine.GetName()}"
-            rotationName = f"{self._parameterNode.trajectoryLine.GetName()}_PCB_Yaw"
-            self.ui.transformNameLabel.text = f"Transform: {transformName}"
-            self.ui.transformNameLabel_2.text = f"Rotation: {rotationName}"
+        if self._parameterNode and self._parameterNode.trajectoryTransform:
+            self.ui.transformNameLabel.text = f"{self._parameterNode.trajectoryTransform.GetName()}"
         else:
-            self.ui.transformNameLabel.text = "Transform: None"
-            self.ui.transformNameLabel_2.text = f"Rotation: None"
+            self.ui.transformNameLabel.text = "No Line Selected"
 
-        #Reconnect the UI Matrix Viewers
-        # For Trajectory
+        #Connect the UI Matrix Viewer for Transform matrix
         self.ui.trajectoryMatrix.setMRMLTransformNode(self._parameterNode.trajectoryTransform)
-        # And Rotation
-        #Store reference in widget
-        self.ui.rotationMatrix.setMRMLTransformNode(self._parameterNode.rotationTransform)
-    
-    # #NOTE This is now obsolete, marked for deletion
-    # def onCreateLineButton(self) -> None:
-    #     """Create a new line markup for trajectory definition."""
-    #     self._parameterNode.trajectoryLine = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode")
-    #     #NOTE Commented out to allow procedural naming
-    #     #lineNode.SetName("TrajectoryLine")
-        
-    #     # Add two default points to create a line
-    #     self._parameterNode.trajectoryLine.AddControlPoint(vtk.vtkVector3d(0, 0, -50))  # Tip (distal)
-    #     self._parameterNode.trajectoryLine.AddControlPoint(vtk.vtkVector3d(0, 0, 50))   # Proximal
-        
-    #     # Set the line as unlocked for manipulation
-    #     self._parameterNode.trajectoryLine.SetLocked(False)
-        
-    #     # Select this line in the selector
-    #     self.ui.trajectoryLineSelector.setCurrentNode(self._parameterNode.trajectoryLine)
 
-    #     '''       
-    #     lineNode = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLMarkupsLineNode")
-    #     #NOTE Commented out to allow procedural naming
-    #     #lineNode.SetName("TrajectoryLine")
-        
-    #     # Add two default points to create a line
-    #     lineNode.AddControlPoint(vtk.vtkVector3d(0, 0, -50))  # Tip (distal)
-    #     lineNode.AddControlPoint(vtk.vtkVector3d(0, 0, 50))   # Proximal
-        
-    #     # Set the line as unlocked for manipulation
-    #     lineNode.SetLocked(False)
-        
-    #     # Select this line in the selector
-    #     self.ui.trajectoryLineSelector.setCurrentNode(lineNode)
-    #     '''
-        
-    #     logging.info(f"Created new trajectory line: {self._parameterNode.trajectoryLine.GetName()}")
 
     def onDeviceUnitChanged(self):
         """Update the device unit parameter"""
@@ -273,7 +219,11 @@ class TrajectoryAlignerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin)
                 #If creating a new line (which has no control points)
                 if self._parameterNode.trajectoryLine.GetNumberOfControlPoints() < 2:
                     #Name it
-                    self._parameterNode.trajectoryLine.SetName("Device_Trajectory")
+                    self._parameterNode.shNode.SetItemName(self._parameterNode.shNode.GetItemByDataNode(self._parameterNode.trajectoryLine),"New Trajectory")
+                    #Get the display node
+                    displayNode = self._parameterNode.trajectoryLine.GetDisplayNode()
+                    #Set it to unconstrained snap (index 0)
+                    displayNode.SetSnapMode(0)
                     # Add two default points to create a line
                     self._parameterNode.trajectoryLine.AddControlPoint(vtk.vtkVector3d(0, 0, 0), "Tip")  # Tip (distal)
                     self._parameterNode.trajectoryLine.AddControlPoint(vtk.vtkVector3d(0, 0, 10), "Shaft")   # Proximal
@@ -287,57 +237,131 @@ class TrajectoryAlignerWidget(ScriptedLoadableModuleWidget, VTKObservationMixin)
                 slicer.vtkMRMLMarkupsNode.PointModifiedEvent, 
                 self.onTrajectoryPointsModified
             )
-
-
-            '''
-            logging.info(f"Trajectory Observer")      
-            # Also observe when points are added/removed
-            self._trajectoryPointAddedObserverTag = self.addObserver(
-                self._parameterNode.trajectoryLine, 
-                slicer.vtkMRMLMarkupsNode.PointAddedEvent, 
-                self.onTrajectoryPointsModified)
             
-            self._trajectoryPointRemovedObserverTag = self.addObserver(
-                self._parameterNode.trajectoryLine, 
-                slicer.vtkMRMLMarkupsNode.PointRemovedEvent, 
-                self.onTrajectoryPointsModified)
-            '''
+            #Log that a new line has been selected
             logging.info(f"Selected trajectory line: {node.GetName()}")
+            
+            #Update the linked Matrix
+            self.updateLinkedMatrix()
             
             # Update transform immediately
             if self._parameterNode:
-                self.logic.updateTransformFromTrajectory(node, self._parameterNode)
-                #And update rotation
-                self.logic.updateRotationFromTrajectory(self._parameterNode)
-                  
+                self.logic.updateTransformFromTrajectory()
+        #If selection set to none
+        else:
+            #Clear the parameter
+            self._parameterNode.trajectoryLine = None
+            #Update the linked Matrix
+            self.updateLinkedMatrix()
+
+        #Update the GUI either way  
         self._updateGUI()
 
     def onTrajectoryPointsModified(self, caller, event) -> None:
         """Handle trajectory line point modifications."""
         if self._parameterNode and self._parameterNode.trajectoryLine:
-            self.logic.updateTransformFromTrajectory(self._parameterNode.trajectoryLine, self._parameterNode)
+            self.logic.updateTransformFromTrajectory()
 
     def onRotationAngleChanged(self,value):
-        """Handle the implant rotation parameter (yaw)"""
-        if self._parameterNode:
-            #Store the value in the parameter node
-            self._parameterNode.rotationAngle = value
-            #Update the matrix
-            #self.logic.updateRotationFromTrajectory(parameterNode=self._parameterNode)
+        """Handle the implant rotation parameter (yaw/twist)"""
+        if self._parameterNode and self._parameterNode.trajectoryTransform:
+            #Instead of storing the value in the parameter node, store it as an attribute in the transform matrix
+            self._parameterNode.trajectoryTransform.SetAttribute("rotationAngle", str(value))
             #Use the master transform computation now instead of the separate rotation one
-            self.logic.updateTransformFromTrajectory(self._parameterNode.trajectoryLine, self._parameterNode)
+            self.logic.updateTransformFromTrajectory()
 
     def onTrajectoryOffsetChanged(self, value):
-        """Handle the implant rotation parameter (yaw)"""
-        if self._parameterNode:
-            #Store the value in the parameter node
-            self._parameterNode.trajectoryOffset = value
-            #Update the matrix
-            #self.logic.updateRotationFromTrajectory(parameterNode=self._parameterNode)
+        """Handle the implant trajectory offset (displacement along trajectory)"""
+        if self._parameterNode and self._parameterNode.trajectoryTransform:
+            #Instead of storing the value in the parameter node, store it as an attribute in the transform matrix
+            self._parameterNode.trajectoryTransform.SetAttribute("trajectoryOffset", str(value))
             #Use the master transform computation now instead of the separate rotation one
-            self.logic.updateTransformFromTrajectory(self._parameterNode.trajectoryLine, self._parameterNode)
+            self.logic.updateTransformFromTrajectory()
 
+    def updateLinkedMatrix(self):
+        """Update the linked matrix (trajectory transform parameter) based on the current trajectory line"""
+        #If there is a trajectoryLine selected 
+        if self._parameterNode.trajectoryLine:
+            # -- Look for linked matrix --
+            #Get the item ID of the current line
+            trajectoryLineItem = self._parameterNode.shNode.GetItemByDataNode(self._parameterNode.trajectoryLine)
+            #Make a list to hold the output
+            childIDs = vtk.vtkIdList()
+            #Attempt to get the item's linked matrix (should be a child)
+            self._parameterNode.shNode.GetItemChildren(trajectoryLineItem,childIDs)
+            #Output variable for search
+            foundLinkedArray = False
+            #Check all children
+            for i in range(childIDs.GetNumberOfIds()):
+                #Get the node ID
+                childItemID = childIDs.GetId(i)
+                #Get the node's category and look for a linked matrix
+                childItemCategory = self._parameterNode.shNode.GetItemAttribute(childItemID, "Category")
+                #If It's a linked matrix
+                if (childItemCategory == "LinkedMatrix"):
+                    #Get the child node from the ID and store it in parameter node
+                    self._parameterNode.trajectoryTransform = self._parameterNode.shNode.GetItemDataNode(childItemID)
+                    #Denote that we found something
+                    foundLinkedArray = True
+                    #Update the name if necessary
+                    #If the name doesn't match its parent
+                    if self._parameterNode.shNode.GetItemName(childItemID) != f"Linked Matrix ({self._parameterNode.trajectoryLine.GetName()})":
+                        #Rename the linked matrix
+                        self._parameterNode.shNode.SetItemName(childItemID, f"Linked Matrix ({self._parameterNode.trajectoryLine.GetName()})")
+                        #Log the change
+                        logging.info(f"Renamed Linked Transform to match parent [{self._parameterNode.shNode.GetItemName(childItemID)}]")    
+                    #Print success to log
+                    logging.info(f"Found Linked Matrix node: {self._parameterNode.trajectoryTransform.GetName()}")
+                    break
+            #--If it doesn't exist,--
+            if foundLinkedArray == False:
+                #Make it
+                self._parameterNode.trajectoryTransform = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLinearTransformNode")
+                #Add the fine tune attributes
+                self._parameterNode.trajectoryTransform.SetAttribute("rotationAngle", "0") #Rotation
+                self._parameterNode.trajectoryTransform.SetAttribute("trajectoryOffset", "0") #Offset
+                #Define Transform name
+                transform_name = f"Linked Matrix ({self._parameterNode.trajectoryLine.GetName()})"
+                #Get a reference to the item
+                trajectoryTransformItem = self._parameterNode.shNode.GetItemByDataNode(self._parameterNode.trajectoryTransform)
+                #Set its name
+                #self._parameterNode.trajectoryTransform.SetName(transform_name)
+                self._parameterNode.shNode.SetItemName(trajectoryTransformItem, transform_name)
+                #Also set an attribute for the item in the hierarchy
+                self._parameterNode.shNode.SetItemAttribute(trajectoryTransformItem, "Category", "LinkedMatrix")
+                #Set the trajectory line as the parent
+                self._parameterNode.shNode.SetItemParent(trajectoryTransformItem, self._parameterNode.shNode.GetItemByDataNode(self._parameterNode.trajectoryLine))
+                logging.info(f"Created new Linked Matrix: {transform_name}")
 
+            #Load the fine tune attributes
+            #If there is a stored rotationAngle parameter
+            if self._parameterNode.trajectoryTransform and self._parameterNode.trajectoryTransform.GetAttribute("rotationAngle"):
+                #Load it to the UI
+                self.ui.rotationSlider.setValue(float(self._parameterNode.trajectoryTransform.GetAttribute("rotationAngle"))) #Twist rotation
+            #If not
+            else:
+                #Initialize the parameter
+                self._parameterNode.trajectoryTransform.SetAttribute("rotationAngle", "0")
+                #Reset the slider to 0
+                self.ui.rotationSlider.setValue(0) #Twist rotation
+            #If there is a stored trajectoryOffset parameter    
+            if self._parameterNode.trajectoryTransform and self._parameterNode.trajectoryTransform.GetAttribute("trajectoryOffset"):
+                #Load it to the UI
+                self.ui.trajectoryOffsetSlider.setValue(float(self._parameterNode.trajectoryTransform.GetAttribute("trajectoryOffset")))#Move along trajectory
+            #If not,
+            else:
+                #Initialize the parameter
+                self._parameterNode.trajectoryTransform.SetAttribute("trajectoryOffset", "0")
+                #Reset the slider to 0
+                self.ui.trajectoryOffsetSlider.setValue(0)#Move along trajectory
+
+        #If there isn't a trajectory line
+        else:
+            #Clear the trajectory transform as well
+            self._parameterNode.trajectoryTransform = None
+            #Clear the fine tune attributes
+            self.ui.rotationSlider.setValue(0) #Twist rotation
+            self.ui.trajectoryOffsetSlider.setValue(0)#Move along trajectory
 
 #
 # TrajectoryAlignerLogic
@@ -366,12 +390,15 @@ class TrajectoryAlignerLogic(ScriptedLoadableModuleLogic):
             tuple: (R, trajectory_unit) - rotation matrix and trajectory unit vector
         """
         
+        # -- Trajectory Handling --
         # Find the vector between trajectory points
         trajectory = trajectory_end - trajectory_start
-        
         # Find the unit vector of the trajectory
         trajectory_unit = trajectory / np.linalg.norm(trajectory)
-        
+        # Let's store a copy in the markup as an attribute since it will matter later
+        self.getParameterNode().trajectoryLine.SetAttribute("trajectory_unit", str(trajectory_unit))
+
+
         # Specify the input vector and target vector
         a = device_unit
         b = trajectory_unit
@@ -402,14 +429,18 @@ class TrajectoryAlignerLogic(ScriptedLoadableModuleLogic):
 
         return R, trajectory_unit
 
-    def updateTransformFromTrajectory(self, trajectoryLine: vtkMRMLMarkupsLineNode, 
-                                    parameterNode: TrajectoryAlignerParameterNode) -> None:
+    def updateTransformFromTrajectory(self) -> None:
         """Update or create transform matrix based on trajectory line.
         
         Args:
             trajectoryLine: The line markup defining the trajectory
             parameterNode: Parameter node containing settings
         """
+
+        #Get the extension's parameter node
+        parameterNode = self.getParameterNode()
+        #Get the trajectory line from the parameter node
+        trajectoryLine = parameterNode.trajectoryLine
         
         if not trajectoryLine or trajectoryLine.GetNumberOfControlPoints() < 2:
             logging.warning("Trajectory line must have at least 2 control points")
@@ -422,7 +453,7 @@ class TrajectoryAlignerLogic(ScriptedLoadableModuleLogic):
             logging.warning("Could not get trajectory points")
             return
         
-        # Parse device unit vector from string
+        # Parse device unit vector from string in parameter node
         try:
             device_unit_str = parameterNode.deviceUnitVector.strip('[]')
             device_unit = np.array([float(x.strip()) for x in device_unit_str.split(',')])
@@ -437,77 +468,47 @@ class TrajectoryAlignerLogic(ScriptedLoadableModuleLogic):
             device_unit
         )
         
-        # Create 4x4 transform matrix r hat which 
+        #Create 4x4 transform matrix Rhat which can also process translation 
         Rhat = np.eye(4)
         Rhat[:3, :3] = R
         Rhat[:3, 3] = traj_points[0, :]  # Translation to first point
 
         #Define a second rotation matrix based on the yaw angle
-        #Get the new rotation angle in radians
-        #theta = (self.getParameterNode.rotationAngle/180) * (np.pi)
-        parameterNode = self.getParameterNode()
-        print(parameterNode)
-        theta = (parameterNode.rotationAngle/180) * (np.pi)
-        #Use theta to calculate the rotation matrix
+
+        #Check the matrix's attributes for an offset parameter
+        if parameterNode.trajectoryTransform and parameterNode.trajectoryTransform.GetAttribute("trajectoryOffset"):
+            #If found, use it
+            offset =  float(parameterNode.trajectoryTransform.GetAttribute("trajectoryOffset"))
+        #If none
+        else:
+            #Default to zero so the calculation works
+            offset = 0
+
+        #Check the matrix's attributes for a rotation parameter
+        if parameterNode.trajectoryTransform and parameterNode.trajectoryTransform.GetAttribute("rotationAngle"):
+            rotationAngle = float(parameterNode.trajectoryTransform.GetAttribute("rotationAngle"))
+            #If found, use it to get the new rotation angle in radians
+            theta = (rotationAngle/180) * (np.pi)     
+        #If none
+        else:
+            #Default to zero so the calculation works
+            theta = 0
+
+        #Use theta and offset to calculate the rotation matrix
         Y = np.array([
             [np.cos(theta), -np.sin(theta), 0, 0],
             [np.sin(theta), np.cos(theta), 0, 0],
-            [0, 0, 1, parameterNode.trajectoryOffset],
+            [0, 0, 1, offset],
             [0, 0, 0, 1]        
             ])
 
         #Combine the two transforms by multiplying in reverse order (Yaw then trajectory so trajectory @ yaw)
         transform_matrix = Rhat @ Y 
         
-        # Get or create transform node
-        transform_name = f"Transform_to_{trajectoryLine.GetName()}"
-        parameterNode.trajectoryTransform = slicer.mrmlScene.GetFirstNodeByName(transform_name)
-        
-        if parameterNode.trajectoryTransform is None:
-            parameterNode.trajectoryTransform = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLinearTransformNode")
-            parameterNode.trajectoryTransform.SetName(transform_name)
-            #Set the trajectory line as the parent
-            #parameterNode.shNode.SetItemParent(parameterNode.trajectoryTransform, parameterNode.shNode.GetItemByDataNode(trajectoryLine))
-            logging.info(f"Created new transform node: {transform_name}")
-        
-        # Update the transform matrix
+        # Update the transform node with new transform matrix
         parameterNode.trajectoryTransform.SetMatrixTransformToParent( #NOTE Changed rom SetAndObserveMatrixTransformToParent since deprecated
             slicer.util.vtkMatrixFromArray(transform_matrix)
         )
-        
-        #logging.info(f"Updated transform matrix for trajectory: {trajectoryLine.GetName()}")
-    
-    def updateRotationFromTrajectory(self, parameterNode: TrajectoryAlignerParameterNode) -> None:
-        #See if there is an active trajectory
-        if parameterNode.trajectoryLine:
-            #Get the new rotation angle in radians
-            theta = (parameterNode.rotationAngle/180) * (np.pi)
-            #Use theta to calculate the rotation matrix
-            transform_matrix = np.array([
-                [np.cos(theta), -np.sin(theta), 0, 0],
-                [np.sin(theta), np.cos(theta),0, 0],
-                [0, 0, 1,parameterNode.trajectoryOffset],
-                [0,0,0,1]        
-                ])
-            
-            # # Create 4x4 transform matrix by adding an identity row and column
-            # transform_matrix = np.eye(4)
-            # transform_matrix[:3, :3] = R
-
-            #Link to node
-            transform_name = parameterNode.trajectoryLine.GetName().replace("_Trajectory","_PCB_Yaw")
-            parameterNode.rotationTransform = slicer.mrmlScene.GetFirstNodeByName(transform_name)
-            if parameterNode.rotationTransform is None:
-                parameterNode.rotationTransform = slicer.mrmlScene.AddNewNodeByClass("vtkMRMLLinearTransformNode")
-                parameterNode.rotationTransform.SetName(transform_name)
-                logging.info(f"Created new transform node: {transform_name}")
-            
-            # Update the transform matrix
-            parameterNode.rotationTransform.SetMatrixTransformToParent( #NOTE Changed rom SetAndObserveMatrixTransformToParent since deprecated
-                slicer.util.vtkMatrixFromArray(transform_matrix)
-            )
-
-
 
 
 #
@@ -543,7 +544,7 @@ class TrajectoryAlignerTest(ScriptedLoadableModuleTest):
         parameterNode.trajectoryLine = lineNode
         
         # Update transform
-        logic.updateTransformFromTrajectory(lineNode, parameterNode)
+        logic.updateTransformFromTrajectory()
         
         # Check that transform was created
         transformName = f"Transform_to_{lineNode.GetName()}"
