@@ -41,7 +41,13 @@
 8. Back in the  Trajectory Aligner Module, objects linked to the trajectory can be rotated around the trajectory axis using "Fine Tune > Twist". Linked objects can also be translated along the trajectory using "Fine Tune > Trajectory Offset" (Note that the tick box increases in increments but any value in mm can be typed in for a more precise offset)
 <img width="772" height="906" alt="SlicerFineTune" src="https://github.com/user-attachments/assets/16d345af-dc9e-4e16-b6ec-baa12b48dfcc" />
 
+ Example of Twist parameter
+ 
+ ![TrajectoryAlignerTwistGif](https://github.com/user-attachments/assets/5a4706c7-a476-4e56-bcbe-90e1b5fb91c9)
 
+Example of Offest Parameter
+
+![TrajectoryAlignerOffsetGif](https://github.com/user-attachments/assets/c2aadea2-dc19-4258-a94d-090217e2b188)
 
 ## Notes and Considerations
 
