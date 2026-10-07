@@ -52,4 +52,4 @@ Example of Offest Parameter
 ## Notes and Considerations
 
 * Only the line currently selected in "Active Trajectory" will be editable, other trajectories will be locked. Thus, you MUST choose the trajectory to be edited in the "Trajectory Settings > Active Trajectory" section 
-* By default, any meshes or markups to be ilnked should be aligned to the vector [0, 0, 1] by default. In exceptional cases, this alignment vector can be changed in "Origin Settings > Original Unit Vector"
+* By default, any meshes or markups to be linked should be aligned to the vector [0, 0, 1] by default. In exceptional cases, this alignment vector can be changed in "Origin Settings > Original Unit Vector"
